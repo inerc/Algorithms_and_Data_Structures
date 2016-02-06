@@ -1,0 +1,181 @@
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+
+struct Point   // Это структура данных
+{
+    int X;     // У нас получается в 1 значении содержится сразу и X и Y
+    int Y;     // Нам больше не нужен массив двумерный - мы можем создать массив таких типов данных
+    double sini;
+    Point() : X(0), Y(0) {}
+};
+
+bool operator < ( const Point& left, const Point& right ) // Мы переопределяем оператор меньше
+{
+    // У нас же новый тип Данных появился, нам нужно знать как это 1 меньше другого
+    return left.X == right.X ? left.Y    <     right.Y : left.X < right.X;  // Мы определяем что меньше у нас по новому через известные данные
+}
+
+// Давайте для примера переопределю функцию сравнения
+bool operator == ( const Point& left, const Point& right )
+{
+    bool X = left.X == right.X; // В данном случае мы просто расписали тот большой тернарный опратор
+    bool Y = left.Y == right.Y;// На две булевские функции
+    return X&&Y; // И вернули true только в том случае если наши точки совпали и по X и по Y одновременно
+}
+
+
+bool IsLessX( const Point& left, const Point& right ) // На самом деле работает идентично нашему оператору меньше
+{
+    // Но он обязательно нужен для функции чтобы понимать какая из точек меньше
+    return left.X == right.X ? left.Y         <           right.Y : left.X < right.X;
+}
+
+bool IsMoreSin( const Point& left, const Point& right ) // Делаем такую же штуку для синусов
+{
+    return left.sini    >    right.sini;
+}
+
+template<class T> // Если у нас будут иные типизированные данные
+bool IsLess( const T& left, const T& right )
+{
+    return left < right;
+}
+
+
+
+template<class T>
+void insertSort(T a[], long size, bool (isLe)(const T&, const T&))
+{
+    // Cюда передается наш шаблон массива
+
+        // Затем говорим откуда и до куда нам сортировать (от left до right) это то что подразумевается для универсальности
+        // Ну и то как мы будем сортировать (по убыванию или по возрастанию) - проще говоря: Следующий элемент должен быть больше? - Да отвечает нам функция isLess и возвращает true если это правда
+        T x;
+        long i, j;
+
+        for ( i=0; i < size; i++)    // цикл проходов, i - номер прохода
+        {
+            x = a[i];
+
+            // поиск места элемента в готовой последовательности
+            for ( j=i-1; j>=0 && isLe(x,a[j]); j--)
+                a[j+1] = a[j];  	// сдвигаем элемент направо, пока не дошли
+
+            // место найдено, вставить элемент
+            a[j+1] = x;
+        }
+
+}
+
+    template<class T>
+    double sinus(T arr, int i)
+    {
+        return (double)((arr[i].Y - arr[0].Y) / (double)sqrt(pow((arr[i].X - arr[0].X), 2) + pow((arr[i].Y - arr[0].Y), 2)));
+    }
+
+
+    int main()
+    {
+        // Не нужно
+        /*int tX = 0;
+        int tY = 0;*/
+        int n = 0;
+        // int m = 0; - Не нужно более, просто убираем (см пункт забиваем данные)
+        cin >> n;
+        //int IndexMin = 0;
+        /*
+        int ** arrayM = new int *[n];
+        for (int count = 0; count < n; count++)
+        	arrayM[count] = new int[2];
+        */
+        // Это был наш старый массив двумерный, теперь, имея структуру, мы имеем право сделать проще
+        Point *arrayM = new Point [n];
+
+        //double *sins = new double[n]; - зачем нам это если у нас структура синус включает в себя?
+
+        for (int i = 0; i < n; i++) // Забиваем данные
+        {
+            //for (int j = 0; j < n; j++) - Убираем тк не 2мерный массив у нас теперь
+            /*cin >> m;
+            arrayM[i][j] = m;*/
+            // А давайте запишем красивее и сэкономим память!
+            cin >> arrayM[i].X >> arrayM[i].Y;
+        }
+
+
+        /*
+        	for (int i = 1; i<n; i++)
+        	{
+        		for (int j = i; j>0 && arrayM[j - 1][0] >= arrayM[j][0]; j--)
+        		{
+
+        			if (arrayM[j - 1][0] == arrayM[j][0])
+        			{
+        				if (arrayM[j - 1][1]>arrayM[j][1])
+        				{
+        					int tmp = arrayM[j - 1][1];
+        					arrayM[j - 1][1] = arrayM[j][1];
+        					arrayM[j][1] = tmp;
+        				}
+        			}
+        			else
+        			{
+        				int tmp = arrayM[j - 1][0];
+        				arrayM[j - 1][0] = arrayM[j][0];
+        				arrayM[j][0] = tmp;
+
+        				tmp = arrayM[j - 1][1];
+        				arrayM[j - 1][1] = arrayM[j][1];
+        				arrayM[j][1] = tmp;
+        			}
+        		}
+        	}
+        */
+// Это старое применение нашей сортировки. Теперь у нас есть функция
+        insertSort(arrayM,n,IsLessX); // Даем наш массив, границы и функцию по которой смотрим меньшее
+
+        arrayM[0].sini = 15.0f; // делаем так чтобы 1 элемент всегда был первым
+
+        for (int i = 1; i < n; i++) // забиваем синусы
+        {
+            /*double sinNow = (double)((arrayM[i][1] - tY) / (double)sqrt(pow((arrayM[i][0] - tX), 2) + pow((arrayM[i][1] - tY), 2)));
+            sins[i] = sinNow;*/
+            //Теперь мы делаем через функции все!
+            arrayM[i].sini = sinus(arrayM,i); // Передаем массив и номер элемента
+            // Это сделано тк в требованиях слово ФУНКЦИЯ стоит. Я решил все-таки 1 функцию написать и ипользовать в теле
+        }
+
+        /*
+        	for (int i = 1; i<n; i++)
+        	{
+        		for (int j = i; j>0 && sins[j - 1]<sins[j]; j--)
+        		{
+
+        			// Меняем местами синусы
+        			double tmpS = sins[j - 1];
+        			sins[j - 1] = sins[j];
+        			sins[j] = tmpS;
+
+        			// и наши данные
+        			int tmp = arrayM[j - 1][0];
+        			arrayM[j - 1][0] = arrayM[j][0];
+        			arrayM[j][0] = tmp;
+
+        			tmp = arrayM[j - 1][1];
+        			arrayM[j - 1][1] = arrayM[j][1];
+        			arrayM[j][1] = tmp;
+        		}
+        	}
+        */
+
+        insertSort(arrayM,n,IsMoreSin); // А теперь тоже самое но только мы смотрим на синусы!
+
+        for (int i = 0; i < n; i++)
+            cout << arrayM[i].X << " " << arrayM[i].Y << endl;
+        //cout << arrayM[i][0] << " " << arrayM[i][1] << endl;
+
+
+    }
